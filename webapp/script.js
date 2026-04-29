@@ -1,3 +1,20 @@
+document.getElementById('imageUpload').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    const imagePreview = document.getElementById('imagePreview');
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imagePreview.src = e.target.result;
+            imagePreview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    } else {
+        imagePreview.src = '';
+        imagePreview.style.display = 'none';
+    }
+});
+
 document.getElementById('uploadButton').addEventListener('click', async () => {
     const imageUpload = document.getElementById('imageUpload');
     const firstApiResponseDisplay = document.getElementById('firstApiResponse');

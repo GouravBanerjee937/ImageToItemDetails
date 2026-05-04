@@ -268,8 +268,13 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                 });
                 const endTime1 = performance.now();
                 firstApiTimeTaken = (endTime1 - startTime1).toFixed(2);
-
-                firstApiResponseData = await response1.json();
+                
+                const response1Text = await response1.text();
+                try {
+                    firstApiResponseData = JSON.parse(response1Text);
+                } catch (e) {
+                    throw new Error("First API returned invalid JSON: " + response1Text);
+                }
                 
                 // Display the full first API response in modal
                 firstApiResponseDisplay.textContent = JSON.stringify(firstApiResponseData, null, 2);
@@ -310,7 +315,12 @@ HTML_CONTENT = r"""<!DOCTYPE html>
                     const endTime2 = performance.now();
                     secondApiTimeTaken = (endTime2 - startTime2).toFixed(2);
 
-                    secondApiResponseData = await response2.json();
+                    const response2Text = await response2.text();
+                    try {
+                        secondApiResponseData = JSON.parse(response2Text);
+                    } catch (e) {
+                        throw new Error(response2Text || "Second API returned invalid JSON.");
+                    }
                     
                     // Display final response in modal
                     apiResponseDisplay.textContent = JSON.stringify(secondApiResponseData, null, 2);

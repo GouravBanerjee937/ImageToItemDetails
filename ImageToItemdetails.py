@@ -579,18 +579,27 @@ class ReusableTCPServer(socketserver.TCPServer):
     allow_reuse_address = True
 
 if __name__ == '__main__':
-    current_port = PORT
-    while True:
-        try:
-            with ReusableTCPServer(("", current_port), MyHandler) as httpd:
-                print(f"Serving at port {current_port}")
-                print(f"Proxying requests for {SECOND_API_URL} via /proxy-api")
-                print(f"Logging results to {CSV_FILE_PATH} via /log-result")
-                print(f"Open your browser to http://localhost:{current_port}")
-                httpd.serve_forever()
-        except OSError as e:
-            if e.errno == 48:
-                print(f"Port {current_port} is already in use. Trying port {current_port + 1}...")
-                current_port += 1
-            else:
-                raise
+    # This line checks if the app is running on the Streamlit Cloud website
+    is_on_cloud = os.getenv("STREAMLIT_RUNTIME_ENV") == "cloud"
+
+    if not is_on_cloud:
+        # This block ONLY runs on your local computer
+        current_port = PORT
+        while True:
+            try:
+                with ReusableTCPServer(("", current_port), MyHandler) as httpd:
+                    print(f"Serving at port {current_port}")
+                    print(f"Proxying requests for {SECOND_API_URL} via /proxy-api")
+                    print(f"Logging results to {CSV_FILE_PATH} via /log-result")
+                    print(f"Open your browser to http://localhost:{current_port}")
+                    httpd.serve_forever()
+            except OSError as e:
+                # Check for "Address already in use" error
+                if e.errno == 48 or (os.name == 'nt' and e.errno == 10048):
+                    print(f"Port {current_port} is already in use. Trying port {current_port + 1}...")
+                    current_port += 1
+                else:
+                    raise
+    else:
+        # This message will show up in your Streamlit Cloud logs instead of an error
+        print("Detected Streamlit Cloud environment. Skipping local TCP server.")
